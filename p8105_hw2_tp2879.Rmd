@@ -5,5 +5,27 @@ output: github_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(haven)
+```
+
+
+# Problem 1
+
+```{r}
+nyc_transit_df = read_csv(file = "./datasets/FAS_NYC_Transit_Subway_Entrance_And_Exit_Data.csv")
+nyc_transit_df = janitor::clean_names(nyc_transit_df)
+```
+
+```{r}
+nyc_transit_df |>
+  select(line, station, name, 
+         station_latitide = latitude, 
+         station_longitude = longitude,
+         routes_served = routes, 
+         entry,
+         vending,
+         entrance_type,
+         ada_compliance) |>
+  mutate(entry = ifelse(entry == "YES", TRUE, FALSE))
 ```
 
