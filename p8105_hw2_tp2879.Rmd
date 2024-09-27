@@ -6,8 +6,23 @@ output: github_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(haven)
+library(readxl)
 ```
 
 
 # Problem 1
+```{r}
+nyc_transit_df = read_csv(file = "./data/FAS_nyc_transit.csv")
+nyc_transit_df = janitor::clean_names()
+```
+
+```{r}
+
+```
+
+# Problem 2
+```{r}
+trash_df = read_csv(file = "./data/FAS_trash.csv")
+trash_df = janitor::clean_names()
+```
 
