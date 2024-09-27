@@ -5,24 +5,73 @@ output: github_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-library(haven)
 library(readxl)
+library(haven)
 ```
-
 
 # Problem 1
+
 ```{r}
-nyc_transit_df = read_csv(file = "./data/FAS_nyc_transit.csv")
-nyc_transit_df = janitor::clean_names()
+nyc_transit_df =  
+  read_csv(file = "./hw2_data/nyc_transit.csv",
+    col_types = cols(
+      Route8 = col_character(), 
+      Route9 = col_character(), 
+      Route10 = col_character(), 
+      Route11 = col_character())) |>
+  janitor::clean_names() |>
+  pivot_longer(
+      cols = route1:route11,
+      names_to = "route")
 ```
 
 ```{r}
-
+nyc_transit_df |>
+  select(
+    line, 
+    station_location,
+    station_name, 
+    station_latitude, 
+    station_longitude, 
+    route, 
+    entry, 
+    vending, 
+    entrance_type, 
+    ada
+  ) |>
+  mutate(entry = ifelse(entry == "YES", TRUE, FALSE))
 ```
+
+## Number of Distinct Stations
+```{r}
+distinct_stations = nyc_transit_df |>
+  distinct(station_name, line) |>
+  nrow()
+```
+
+## Number of ADA Compliant Stations
+```{r}
+ada_compliant_stations = nyc_transit_df |>
+  filter(ada == TRUE) |>
+  nrow()
+```
+
+## Proportion of Entrances Without Vending that Allow Entry
+```{r}
+total_entrances = nyc_transit_df |>
+  filter(vending == "NO") |>
+  nrow()
+
+entrances_with_entry = nyc_transit_df |>
+  filter(vending == "NO", entry == TRUE) |>
+  nrow()
+
+proportion = entrances_with_entry / total_entrances
+```
+
 
 # Problem 2
 ```{r}
-trash_df = read_csv(file = "./data/FAS_trash.csv")
-trash_df = janitor::clean_names()
+trash_df = read_csv(file = "./hw2_data/trash.xlsx")
+trash_df = janitor::clean_names(trash_df)
 ```
-
