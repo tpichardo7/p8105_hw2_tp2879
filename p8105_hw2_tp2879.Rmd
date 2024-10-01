@@ -75,3 +75,17 @@ proportion = entrances_with_entry / total_entrances
 trash_df = read_csv(file = "./hw2_data/trash.xlsx")
 trash_df = janitor::clean_names(trash_df)
 ```
+
+
+# Problem 3
+
+```{r}
+viewers.info()
+viewers.fillna(0, inplace - TRUE)
+```
+
+```{r}
+avg_viewership_season_1 = viewers[viewers["season"] == 1]["viewers"].mean()
+avg_viewership_season_5 = viewers[viewers["season"] == 5]["viewers"].mean()
+```
+
