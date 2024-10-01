@@ -71,13 +71,59 @@ proportion = entrances_with_entry / total_entrances
 
 
 # Problem 2
-```{r}
-trash_df = read_excel(file = "./hw2_data/trash.xlsx")
-trash_df = janitor::clean_names(trash_df)
 
-trash_wheel = "Mr. Trash Wheel"
+## Reading and Cleaning the Mr.Trash Wheel sheet
+```{r}
+trash_df = read_excel("./hw2_data/trash.xlsx")
+trash_df = janitor::clean_names(trash_df)
 ```
 
+```{r}
+trash_data = 
+  read_excel(trash_df,
+    sheet = "Mr. Trash Wheel",
+    skip = 2, 
+    col_names = TRUE, 
+    range = "A1:D655")
+  select(-contains("notes")) |>
+  filter(!is.na(homes))
+
+trash_data = 
+  trash_df |>
+  mutate(sports_balls = as.integer(round(sports)))
+```
+
+## Reading and Cleaning the Professor Trash Wheel sheet
+```{r}
+trash_data = 
+  read_excel(trash_df,
+    sheet = "Professor Trash Wheel",
+    skip = 2, 
+    col_names = TRUE, 
+    range = "A1:D655")
+  select(-contains("notes")) |>
+  filter(!is.na("homespowered*"))
+
+trash_data = 
+  trash_df |>
+  mutate(sports_balls = as.integer(round(sports)))
+```
+
+## Reading and Cleaning the Gwynnda Trash Wheel sheet
+```{r}
+trash_data = 
+  read_excel(trash_df,
+    sheet = "Gwynnda Trash Wheel",
+    skip = 2, 
+    col_names = TRUE, 
+    range = "A1:D655")
+  select(-contains("notes")) |>
+  filter(!is.na("homespowered*"))
+
+trash_data = 
+  trash_df |>
+  mutate(sports_balls = as.integer(round(sports)))
+```
 
 # Problem 3
 
