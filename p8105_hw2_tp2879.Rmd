@@ -218,6 +218,8 @@ gbb_df = gbb_df |>
 write_csv(gbb_df, "./hw2_data/gbb_final_dataset.csv")
 ```
 
+The final dataset, `gbb_df`, is a comprehensive and well-structured composition of individual bakers' performances across various seasons and episodes of the Great British Bake Off. Each row represents a unique entry for a baker, containing key information such as their first and last names`first_name` and `last_name`, `series`, `episode`, and `result` such as Star Baker or Winner. The dataset is free from missing values in crucial areas, ensuring high quality and consistency. 
+
 ## Star Bakers and Winners - Season 5 through Season 10
 ```{r}
 star_bakers_df = 
@@ -227,22 +229,19 @@ star_bakers_df =
   relocate(first_name, last_name)
 ```
 
-The final dataset, `gbb_df`, is a comprehensive and well-structured composition of individual bakers' performances across various seasons and episodes of the Great British Bake Off. Each row represents a unique entry for a baker, containing key information such as their first and last names`first_name` and `last_name`, `series`, `episode`, and `result` such as Star Baker or Winner. The dataset is free from missing values in crucial areas, ensuring high quality and consistency. 
-
 ```{r}
 bakers_table = 
   star_bakers_df |> 
   select(
     season = series,
     episode = episode,
-    star_baker = first_name) |>
-  mutate(result = ifelse(star_baker == "Winner", "Winner", "Star Baker")) |> 
+    baker = first_name, 
+    result) |>
+  relocate(baker, season) |> 
   arrange(season, episode)
 
-bakers_table = kable(bakers_table, 
-                    caption = "Star Baker or Winner of Each Episode (Seasons 5-10)",
-                    format = "markdown",
-                    colnames = c("First Name", "Last Name", "Result", "Series", "Episode"))
+bakers_table |> 
+  kable(caption = "Great British Bake Off Star Bakers and Winners - Season 5 through 10")
 ```
 
 There were a few predictable winners such as Candice Brown of Season 7 who was awarded Star Baker three times before ultimately winning the Great British Bake Off. There were also a few suprising winners such as David from Season 10 who won the Great British Bake Off without any Star Baker awards.
