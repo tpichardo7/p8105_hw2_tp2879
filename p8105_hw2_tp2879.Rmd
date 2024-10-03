@@ -7,7 +7,10 @@ output: github_document
 library(tidyverse)
 library(readxl)
 library(dplyr)
+library(knitr)
 ```
+
+
 
 # Problem 1
 
@@ -70,60 +73,157 @@ proportion = entrances_with_entry / total_entrances
 ```
 
 
+
 # Problem 2
 
 ## Reading and Cleaning the Mr.Trash Wheel sheet
 ```{r}
-trash_df = read_excel("./hw2_data/trash.xlsx")
+trash_df = read_xlsx("./hw2_data/trash.xlsx")
 trash_df = janitor::clean_names(trash_df)
 ```
 
 ```{r}
-trash_data = 
-  read_excel(trash_df,
+mr_trash = 
+  read_xlsx("./hw2_data/trash.xlsx",
     sheet = "Mr. Trash Wheel",
-    skip = 2, 
-    col_names = TRUE, 
-    range = "A1:D655")
-  select(-contains("notes")) |>
-  filter(!is.na(homes))
-
-trash_data = 
-  trash_df |>
-  mutate(sports_balls = as.integer(round(sports)))
+    skip = 1, 
+    col_names = TRUE) |> 
+  janitor::clean_names() |> 
+  mutate(sports_balls = as.integer(sports_balls)) 
 ```
 
 ## Reading and Cleaning the Professor Trash Wheel sheet
 ```{r}
-trash_data = 
-  read_excel(trash_df,
+prof_trash = trash_df = 
+  read_xlsx("./hw2_data/trash.xlsx",
     sheet = "Professor Trash Wheel",
-    skip = 2, 
-    col_names = TRUE, 
-    range = "A1:D655")
-  select(-contains("notes")) |>
-  filter(!is.na("homespowered*"))
-
-trash_data = 
-  trash_df |>
-  mutate(sports_balls = as.integer(round(sports)))
+    skip = 1, 
+    col_names = TRUE) |> 
+  janitor::clean_names() 
 ```
 
 ## Reading and Cleaning the Gwynnda Trash Wheel sheet
 ```{r}
-trash_data = 
-  read_excel(trash_df,
+g_trash = trash_df = 
+  read_xlsx("./hw2_data/trash.xlsx",
     sheet = "Gwynnda Trash Wheel",
-    skip = 2, 
-    col_names = TRUE, 
-    range = "A1:D655")
-  select(-contains("notes")) |>
-  filter(!is.na("homespowered*"))
-
-trash_data = 
-  trash_df |>
-  mutate(sports_balls = as.integer(round(sports)))
+    skip = 1, 
+    col_names = TRUE) |> 
+  janitor::clean_names() 
 ```
 
-# Problem 3
+## Combining the Trash Wheel sheets
+```{r}
+major_trash_df = 
+  mr_trash |>
+  full_join(prof_trash, by = c("dumpster", "month", "weight_tons")) |>
+  full_join(g_trash, by = c("dumpster", "month", "weight_tons"))
+```
 
+
+# Problem 3
+```{r}
+bakers_df = 
+  read_csv(file = "./hw2_data/bakers.csv", na = c("NA", ".", "")) |>
+  janitor::clean_names() |>
+  filter(!is.na(baker_name)) |>
+  separate(baker_name, into = c("first_name", "last_name"), sep = " ") 
+
+bakes_df = 
+  read_csv(file = "./hw2_data/bakes.csv", na = c("NA", ".", "")) |> 
+  janitor::clean_names() |>
+  filter(!is.na(baker)) |>
+  rename(first_name = baker) 
+
+results_df = 
+  read_csv(file = "./hw2_data/results.csv", na = c("NA", ".", ""), skip = 2) |> 
+  janitor::clean_names() |>
+  filter(!is.na(baker)) |>
+  rename(first_name = baker) 
+```
+
+```{r}
+missing_bakers = anti_join(bakes_df, bakers_df, by = "first_name")
+missing_results = anti_join(results_df, bakers_df, by = "first_name")
+```
+
+## Merging the Datasets
+```{r}
+gbb_df = 
+  bakers_df |>
+  full_join(bakes_df, by = c("series", "first_name")) |> 
+  full_join(results_df, by = c("series","episode", "first_name")) |> 
+  arrange(first_name, series, episode) |> 
+  relocate(result, series, episode) |> 
+  drop_na(result)
+```
+
+## Organizing the Combined Dataset
+```{r}
+gbb_df = gbb_df |>
+  select(first_name, everything())
+```
+
+## Exporting the Final Dataset
+```{r}
+write_csv(gbb_df, "./hw2_data/gbb_final_dataset.csv")
+```
+
+## Star Bakers and Winners - Season 5 through Season 10
+```{r}
+star_bakers_df = 
+  gbb_df |>
+  filter(series >= 5, series <= 10) |>
+  filter(result %in% c("STAR BAKER", "WINNER"))|> 
+  relocate(first_name, last_name)
+```
+
+```{r}
+bakers_table = 
+  star_bakers_df |> 
+  select(
+    season = series,
+    episode = episode,
+    star_baker = first_name) |>
+  mutate(result = ifelse(star_baker == "Winner", "Winner", "Star Baker")) |> 
+  arrange(season, episode)
+
+bakers_table = kable(bakers_table, 
+                    caption = "Star Baker or Winner of Each Episode (Seasons 5-10)",
+                    format = "markdown",
+                    colnames = c("First Name", "Last Name", "Result", "Series", "Episode"))
+```
+
+There were a few predictable winners such as Candice Brown of Season 7 who was awarded Star Baker three times before ultimately winning the Great British Bake Off. There were also a few suprising winners such as David from Season 10 who won the Great British Bake Off without any Star Baker awards.
+
+## Viewership
+```{r}
+viewers_df = read_csv("./hw2_data/viewers.csv") |>
+  janitor::clean_names()
+
+viewership = 
+  viewers_df |>
+  pivot_longer(
+    cols = series_1:series_10, 
+    names_to = "Season",
+    values_to = "Values"
+  ) |>
+  filter(!is.na(episode))
+```
+
+### Average Viewrship in Season 1 and Season 5
+```{r}
+avg_view_s1 = 
+  viewership |>
+  filter(Season == "series_1") |>
+  summarize(avg_view_s1 = mean(Values, na.rm = TRUE))
+
+avg_view_s5 = 
+  viewership |>
+  filter(Season == "series_5") |>
+  summarize(avg_view_s5 = mean(Values, na.rm = TRUE))
+```
+
+The average viewership in Season 1 was `r avg_view_s1`.
+
+The average viewership in Season 5 was `r avg_view_s5`.
