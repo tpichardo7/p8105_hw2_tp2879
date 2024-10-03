@@ -102,12 +102,12 @@ There are `r a_compliant` ADA compliant stations that serve the A train.
 # Problem 2
 
 ## Reading and Cleaning the Mr.Trash Wheel sheet
-```{r}
+```{r message = FALSE}
 trash_df = read_xlsx("./hw2_data/trash.xlsx")
 trash_df = janitor::clean_names(trash_df)
 ```
 
-```{r}
+```{r message = FALSE}
 mr_trash = 
   read_xlsx("./hw2_data/trash.xlsx",
     sheet = "Mr. Trash Wheel",
@@ -170,7 +170,7 @@ The total number of cigarette butts collected by Gwynnda in June of 2022 is `r t
 # Problem 3
 
 ## Reading and Cleaning the Data of Individual Bakers, Their Bakes, and Their Performance
-```{r}
+```{r message = FALSE}
 bakers_df = 
   read_csv(file = "./hw2_data/bakers.csv", na = c("NA", ".", "")) |>
   janitor::clean_names() |>
@@ -247,7 +247,7 @@ bakers_table |>
 There were a few predictable winners such as Candice Brown of Season 7 who was awarded Star Baker three times before ultimately winning the Great British Bake Off. There were also a few suprising winners such as David from Season 10 who won the Great British Bake Off without any Star Baker awards.
 
 ## Viewership
-```{r}
+```{r message = FALSE}
 viewers_df = read_csv("./hw2_data/viewers.csv") |>
   janitor::clean_names()
 
