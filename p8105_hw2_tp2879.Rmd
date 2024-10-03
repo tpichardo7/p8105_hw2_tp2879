@@ -1,5 +1,5 @@
 ---
-title: "p8105_hw2_tp2879"
+title: "P8105 Homework 2"
 output: github_document
 ---
 
@@ -11,9 +11,9 @@ library(knitr)
 ```
 
 
-
 # Problem 1
 
+## Reading and Cleaning the NYC Transit data
 ```{r}
 nyc_transit_df =  
   read_csv(file = "./hw2_data/nyc_transit.csv",
@@ -45,6 +45,9 @@ nyc_transit_df |>
   mutate(entry = ifelse(entry == "YES", TRUE, FALSE))
 ```
 
+### Discussion
+The `nyc_transit_df` dataset contails detailed information about subway stations in New York City, including variables such as `station_name`, `line`, `ada`, and `entrance_type`. To prepare the dataset for analysis, I performed data cleaning steps such as converting the entry variable from a character to a logical variable. After the cleaning process, the data is considered tidy, as each variable is represented in its own column. 
+
 ## Number of Distinct Stations
 ```{r}
 distinct_stations = nyc_transit_df |>
@@ -52,12 +55,16 @@ distinct_stations = nyc_transit_df |>
   nrow()
 ```
 
+There are `r distinct_stations` distinct stations.
+
 ## Number of ADA Compliant Stations
 ```{r}
 ada_compliant_stations = nyc_transit_df |>
   filter(ada == TRUE) |>
   nrow()
 ```
+
+There are `r ada_compliant_stations` ADA compliant stations.
 
 ## Proportion of Entrances Without Vending that Allow Entry
 ```{r}
@@ -72,7 +79,25 @@ entrances_with_entry = nyc_transit_df |>
 proportion = entrances_with_entry / total_entrances
 ```
 
+The proportion of station entrances/exits without vending allowing entrance is `r proportion`.
 
+```{r}
+a_train = 
+  nyc_transit_df |> 
+    filter(value == "A")
+
+a_distinct = a_train |>
+  distinct(station_name) |>
+  nrow()
+
+a_compliant = a_train |>
+  filter(ada == TRUE) |>
+  nrow()
+```
+
+There are `r a_distinct` distinct stations that serve the A train.
+
+There are `r a_compliant` ADA compliant stations that serve the A train.
 
 # Problem 2
 
@@ -120,8 +145,31 @@ major_trash_df =
   full_join(g_trash, by = c("dumpster", "month", "weight_tons"))
 ```
 
+### Discussion
+The combined `major_trash_df` dataset is comprised of the Mr. Trash Wheel sheet (`mr_trash`), the Professor Trash Wheel sheet (`prof_trash`), and the Gwynnda Trash Wheel sheet (`g_trash`). To prepare the dataset for analysis, I performed several data cleaning steps, including filtering out rows that do not include dumpster-specific data, ensuring that the variable names are consistent, and rounding the values in the `sports_balls` column to the nearest integer and converting the result to an integer variable. After the cleaning process, the data is relatively tidy, as each varibale is stored in its own column, and each observational corresponds to a unique row.
+
+## Total Weight of Trash Collected by Professor Trash Wheel
+```{r}
+total_weight = prof_trash |> 
+  summarize(total_weight = sum(weight_tons, na.rm = TRUE))
+```
+
+The total weight of trash collected by Professor Trash Wheel is `r total_weight`.
+
+## Total Number of Cigarette Butts Collected by Gwynnda in June of 2022
+```{r}
+total_cigarette = g_trash |> 
+  filter(
+    month == "June",
+    year == 2022) |> 
+  summarize(total_cigarette = sum(cigarette_butts, na.rm = TRUE)) 
+```
+
+The total number of cigarette butts collected by Gwynnda in June of 2022 is `r total_cigarette`.
 
 # Problem 3
+
+## Reading and Cleaning the Data of Individual Bakers, Their Bakes, and Their Performance
 ```{r}
 bakers_df = 
   read_csv(file = "./hw2_data/bakers.csv", na = c("NA", ".", "")) |>
@@ -142,6 +190,7 @@ results_df =
   rename(first_name = baker) 
 ```
 
+## Checking for Completeness and Correctness
 ```{r}
 missing_bakers = anti_join(bakes_df, bakers_df, by = "first_name")
 missing_results = anti_join(results_df, bakers_df, by = "first_name")
@@ -177,6 +226,8 @@ star_bakers_df =
   filter(result %in% c("STAR BAKER", "WINNER"))|> 
   relocate(first_name, last_name)
 ```
+
+The final dataset, `gbb_df`, is a comprehensive and well-structured composition of individual bakers' performances across various seasons and episodes of the Great British Bake Off. Each row represents a unique entry for a baker, containing key information such as their first and last names`first_name` and `last_name`, `series`, `episode`, and `result` such as Star Baker or Winner. The dataset is free from missing values in crucial areas, ensuring high quality and consistency. 
 
 ```{r}
 bakers_table = 
